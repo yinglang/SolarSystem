@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+	<style>
+		.container{
+			width:95%;
+			height:80%;
+			overflow:hidden;
+			position:absolute;
+			background:#000000;
+		}
+	</style>
+
+    <script src="lib/three.js"></script>
+    <script src="lib/TrackballControls.js"></script>
+    <script src="js/Data.js"></script>
+    <script src="js/Planet.js"></script>
+    <script src="js/KeyCameraListenr.js"></script>
+    <script src="js/Application.js"></script>
+</head>
+<body>
+<div>
+    <div style="float: left; width: 30%">
+        <table border="8" style="background-color: aquamarine">
+            <tr><td>按键</td><td>功能</td></tr>
+            <tr><td>E</td><td>切换到地球视角</td></tr>
+            <tr><td>L</td><td>切回默认视角</td></tr>
+            <tr><td>W S A D</td><td>移动视角窗口</td></tr>
+            <tr><td>鼠标左右中键</td><td>改变视角窗口</td></tr>
+        </table>
+    </div>
+    <div style="display: inline-block; margin-top: 35px; margin-bottom: 35px" align="center">
+        <font size="20px" color="#deb887">太阳系模拟系统</font>
+    </div>
+</div>
+<br/>
+
+<div class ="container"></div>
+</div>
+<script id="fragmentShader" type="x-shader/x-fragment">
+
+			uniform float time;
+
+			uniform sampler2D texture1;
+			uniform sampler2D texture2;
+
+			varying vec2 texCoord;
+
+			void main( void ) {
+
+				vec4 noise = texture2D( texture1, texCoord );
+
+				vec2 T1 = texCoord + vec2( 1.5, -1.5 ) * time  * 0.01;
+				vec2 T2 = texCoord + vec2( -0.5, 2.0 ) * time *  0.01;
+
+				T1.x -= noise.r * 2.0;
+				T1.y += noise.g * 4.0;
+				T2.x += noise.g * 0.2;
+				T2.y += noise.b * 0.2;
+
+				float p = texture2D( texture1, T1 * 2.0 ).a + 0.25;
+
+				vec4 color = texture2D( texture2, T2 );
+				vec4 temp = color * 2.0 * ( vec4( p, p, p, p ) ) + ( color * color );
+				gl_FragColor = temp;
+				//vec4 color = texture2D(texture2, texCoord);
+				//vec4 temp = color * FOO;
+				gl_FragColor = temp;
+			}
+
+		</script>
+<script id="vertexShader" type="x-shader/x-vertex">
+			varying vec2 texCoord;
+
+			void main()
+			{
+				texCoord = uv;
+				vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 ) * FOO;
+				gl_Position = projectionMatrix * mvPosition;
+			}
+
+		</script>
+<script>
+    function main() {
+        var baseContainer = document.body;
+        var app = new Application(baseContainer);
+        app.render();
+    }
+    main();
+</script>
+</body>
+</html>
